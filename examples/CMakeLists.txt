@@ -19,6 +19,7 @@ dp_imapp_add_example(BigAppStructure)
 dp_imapp_add_example(CloseButton)
 dp_imapp_add_example(DockSpace)
 dp_imapp_add_example(HelloWorld)
+dp_imapp_add_example(ImGuiDemo)
 dp_imapp_add_example(MainWindow)
 
-dp_target_set_vs_startup_project(${PROJECT_NAME}_Example_HelloWorld)
+dp_configure_target(${PROJECT_NAME}_Example_HelloWorld VS_STARTUP_PROJECT_IF_TOP_LEVEL)
