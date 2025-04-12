@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21.0)
+cmake_minimum_required(VERSION 3.24.0)
 
 project(dpImApp VERSION 0.0.1 LANGUAGES CXX)
 
@@ -10,7 +10,7 @@ option(DP_IMAPP_INSTALL "Generate installation target" OFF) # TODO
 set(DP_IMAPP_IMGUI_BACKENDS_DIR ${CMAKE_CURRENT_BINARY_DIR}/ImGuiBackends CACHE PATH "ImGui backends dir")
 
 include(FetchContent)
-FetchContent_Declare(dpCMake GIT_REPOSITORY https://github.com/GroPask/dpCMake.git GIT_TAG v0.0.4)
+FetchContent_Declare(dpCMake URL https://github.com/GroPask/dpCMake/archive/refs/heads/main.zip)
 FetchContent_MakeAvailable(dpCMake)
 include(${dpcmake_SOURCE_DIR}/dpCMake.cmake)
 

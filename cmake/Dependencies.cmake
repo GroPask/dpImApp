@@ -20,15 +20,13 @@ function (patchImgui imguiSrcDir)
         https://raw.githubusercontent.com/conan-io/conan-center-index/refs/heads/master/recipes/imgui/all/CMakeLists.txt
         ${imguiSrcDir}/CMakeLists.txt
     )
-    
-    string(CONCAT aliasStr [=[add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})]=] "\nset_target_properties")
-    
-    dp_replace_in_file(${imguiSrcDir}/CMakeLists.txt
-        "set(MISC_DIR" "option(IMGUI_INSTALL \"Generate installation target\" ON)\n\nset(MISC_DIR"
-        "set(MISC_DIR" "set(IMGUI_SRC_DIR ${imguiSrcDir})\nset(MISC_DIR"
-        "set_target_properties" ${aliasStr}
-        "include(GNUInstallDirs)" "if (IMGUI_INSTALL)\ninclude(GNUInstallDirs)"
-        "PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)\nendif()" "PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)\nendif()\nendif()"
+        
+    dp_patch_file(${imguiSrcDir}/CMakeLists.txt
+        ADD_LINE_BEFORE "set(MISC_DIR" "option(IMGUI_INSTALL \"Generate installation target\" ON)\n"
+        ADD_LINE_BEFORE "set(MISC_DIR" "set(IMGUI_SRC_DIR ${imguiSrcDir})"
+        ADD_LINE_AFTER [=[add_library(${PROJECT_NAME} ${SOURCE_FILES})]=] [=[add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})]=]
+        ADD_LINE_BEFORE "include(GNUInstallDirs)" "if (IMGUI_INSTALL)"
+        APPEND_LINE "endif()"
     )
 endfunction ()
 
