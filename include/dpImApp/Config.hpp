@@ -1,5 +1,5 @@
-#ifndef DP_IMAPP_EXPORT_HPP
-#define DP_IMAPP_EXPORT_HPP
+#ifndef DP_IMAPP_CONFIG_HPP
+#define DP_IMAPP_CONFIG_HPP
 
 #ifdef DP_IMAPP_SHARED
     #ifdef _WIN32

@@ -7,6 +7,9 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
+#include "AppImplInterface.hpp"
+#define IMGUI_IMPL_API
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -16,8 +19,6 @@
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
-#include <functional>
 
 #if IMGUI_VERSION_NUM < 19160
     #error ImGui version not supported
@@ -43,11 +44,13 @@ static void glfw_error_callback(int error, const char* description)
 }
 
 // Main code
-int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, const std::function<void(GLFWwindow*)>& init_func, const std::function<void()>& update_func)
+int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, AppImplInterface& app_impl_interface)
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return 1;
+
+    app_impl_interface.InitBeforeCreateMainWindow();
 
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -138,7 +141,7 @@ int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, const std:
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
-    init_func(window);
+    app_impl_interface.InitBeforeMainLoop(window);
 
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -170,7 +173,7 @@ int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, const std:
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        update_func();
+        app_impl_interface.Update();
 
         // Rendering
         ImGui::Render();

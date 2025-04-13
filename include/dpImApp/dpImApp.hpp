@@ -1,25 +1,22 @@
-#ifndef DP_IMAPP_HPP
-#define DP_IMAPP_HPP
+#ifndef DP_IMAPP_APP_HPP
+#define DP_IMAPP_APP_HPP
 
-#include "Export.hpp"
+#include "Config.hpp"
 
 #include <functional>
 #include <memory>
 #include <string_view>
 
-// TODO
-// Save position main window
-// Auto size main window
-// Install
-// Auto dock space sur la main window pour faire comme c'est le cas pas default ?
-// Always static dpImAppMain to handle exe side code (for global dll sharing) and WinMain ?
-// Kind of Interface/VTable with multiple callback to pass through Patched.cpp ?
-// Simple test ImGui::Text and x loop and app.Close();
-
 namespace dpImApp
 {
+    namespace detail { class AppImpl; }
+
     enum AppFlag : int
     {
+        AlwaysAutoResizeMainWindowToContent = (1 << 0),
+        NoResizableMainWindow               = (1 << 1), // Implicit if AlwaysAutoResizeMainWindowToContent
+        NoSavedMainWindowPos                = (1 << 2),
+        NoSavedMainWindowSize               = (1 << 3), // Implicit if AlwaysAutoResizeMainWindowToContent
     };
     using AppFlags = int;
 
@@ -46,8 +43,7 @@ namespace dpImApp
     private:
         DP_IMAPP_API int RunImpl(void (*local_init_func)(void*), const std::function<void()>& update_func);
 
-        struct Data;
-        std::unique_ptr<Data> InternalData;
+        std::unique_ptr<detail::AppImpl> Impl;
     };
 
 } // namespace dpImApp

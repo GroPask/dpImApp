@@ -1,0 +1,18 @@
+#ifndef DP_IMAPP_IMGUI_INFOS_HPP
+#define DP_IMAPP_IMGUI_INFOS_HPP
+
+#include <imgui_export_headers.h>
+
+// Simple is empty working because we know __VA_ARGS__ can't have comma
+#define DP_IMAPP_PRIVATE_IS_EMPTY(...) DP_IMAPP_PRIVATE_IS_EMPTY_IMPL(__VA_ARGS__)
+#define DP_IMAPP_PRIVATE_IS_EMPTY_IMPL(...) DP_IMAPP_PRIVATE_NO_COMMA(DP_IMAPP_PRIVATE_CALL_CHECK ## __VA_ARGS__ ())
+#define DP_IMAPP_PRIVATE_CALL_CHECK() dummyA, dummyB
+#define DP_IMAPP_PRIVATE_NO_COMMA(...) DP_IMAPP_PRIVATE_EXPAND(DP_IMAPP_PRIVATE_ARG2(__VA_ARGS__, 1, 0, 42))
+#define DP_IMAPP_PRIVATE_ARG2(_0, _1, _2, ...) _2
+#define DP_IMAPP_PRIVATE_EXPAND(...) __VA_ARGS__
+
+#if (DP_IMAPP_PRIVATE_IS_EMPTY(IMGUI_API))
+    #define DP_IMAPP_IMGUI_SEEMS_STATIC
+#endif
+
+#endif

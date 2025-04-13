@@ -1,15 +1,12 @@
 #include "dpImApp/dpImApp.hpp"
 
-#ifdef DP_IMAPP_SHARED
+#include "ImGuiInfos.hpp"
+
+#if defined(DP_IMAPP_SHARED) && defined(DP_IMAPP_IMGUI_SEEMS_STATIC)
 // Try to not leak at all ImGui in our headers
 // Begin ImGui Forward DeclarationS
 struct ImGuiContext;
-#ifdef IMGUI_API
-    #define FAKE_IMGUI_API IMGUI_API
-#else
-    #define FAKE_IMGUI_API
-#endif
-namespace ImGui { FAKE_IMGUI_API void SetCurrentContext(ImGuiContext* ctx); }
+namespace ImGui { IMGUI_API void SetCurrentContext(ImGuiContext* ctx); }
 // End ImGui Forward DeclarationS
 
 namespace dpImApp::detail
@@ -24,7 +21,7 @@ namespace dpImApp::detail
 template <class F>
 int dpImApp::App::Run(F&& update_func)
 {
-    #ifdef DP_IMAPP_SHARED
+    #if defined(DP_IMAPP_SHARED) && defined(DP_IMAPP_IMGUI_SEEMS_STATIC)
     return RunImpl(&detail::LocalInitImGuiContext, static_cast<F&&>(update_func));
     #else
     return RunImpl(nullptr, static_cast<F&&>(update_func));
