@@ -39,6 +39,7 @@ namespace dpImApp::detail
         const std::function<void()>* UpdateFunc = nullptr;
 
         bool IsRunning = false;
+        unsigned int FrameCount = 0;
         GLFWwindow* MainWindow = nullptr;
     };
 

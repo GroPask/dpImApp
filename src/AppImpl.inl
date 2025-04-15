@@ -33,6 +33,7 @@ inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const s
     assert(!IsRunning);
 
     IsRunning = true;
+    FrameCount = 0;
 
     LocalInitFunc = local_init_func;
     UpdateFunc = &update_func;
@@ -108,6 +109,9 @@ inline void dpImApp::detail::AppImpl::Close()
 
 void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow()
 {
+    if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
     if ((Flags & AppFlag::NoResizableMainWindow) != 0)
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 }
@@ -158,13 +162,40 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     };
     settingsHandler.UserData = this;
     ImGui::AddSettingsHandler(&settingsHandler);
+
+    //ImGuiContext& g = *GImGui;
+    //if (g.IO.IniFilename != nullptr)
+    //{
+    //    assert(!g.SettingsLoaded);
+    //    assert(g.SettingsWindows.empty());
+    //    ImGui::LoadIniSettingsFromDisk(g.IO.IniFilename);
+    //    g.SettingsLoaded = true;
+    //}
+    // Deplacer la creation du contexte dans InitBeforeCreateMainWindow comme ca on peut faire la gestion des settings directement
+    // Et avoir la bonne taille et position de fenetre direct
+    // On peut aussi savoir qu'il n'y a pas de save et qu'il faut attendre une frame avant de show en cas de AlwaysAutoResizeMainWindowToContent
+    // Virrer le implicit dans -> NoSavedMainWindowSize               = (1 << 3), // Implicit if AlwaysAutoResizeMainWindowToContent
 }
+
+//#include <chrono>
+//#include <thread>
 
 void dpImApp::detail::AppImpl::Update()
 {
     assert(UpdateFunc != nullptr);
 
+    //std::printf("%d Begin\n", FrameCount);
     (*UpdateFunc)();
+    //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    //std::printf("%d End\n", FrameCount);
+
+    if (FrameCount == 0)
+    {
+        if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
+            glfwShowWindow(MainWindow);
+    }
+
+    ++FrameCount;
 }
 
 void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
