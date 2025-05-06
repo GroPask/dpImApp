@@ -52,6 +52,17 @@ inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags mai
 {
     assert(IsRunning);
 
+    static constexpr const char* MainWindowName = "###dpImAppMainWindow";
+
+    if (ImGuiWindow* imGuiMainWindow = ImGui::FindWindowByName(MainWindowName))
+    {
+        const int imGuiMainWindowPosX = static_cast<int>(imGuiMainWindow->Pos.x);
+        const int imGuiMainWindowPosY = static_cast<int>(imGuiMainWindow->Pos.y);
+
+        if (imGuiMainWindowPosX != MainWindowPosX || imGuiMainWindowPosY != MainWindowPosY)
+            glfwSetWindowPos(MainWindow, imGuiMainWindowPosX, imGuiMainWindowPosY);
+    }
+
     #ifdef IMGUI_HAS_VIEWPORT
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -72,7 +83,7 @@ inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags mai
     if ((main_window_flags & MainWindowFlag::MenuBar) != 0)
         imgui_main_window_flags = imgui_main_window_flags | ImGuiWindowFlags_MenuBar;
 
-    [[maybe_unused]] const bool result = ImGui::Begin("###dpImAppMainWindow", nullptr, imgui_main_window_flags);
+    [[maybe_unused]] const bool result = ImGui::Begin(MainWindowName, nullptr, imgui_main_window_flags);
     assert(result);
 }
 
@@ -130,6 +141,9 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     #else
     assert(LocalInitFunc == nullptr);
     #endif
+
+    glfwSetWindowUserPointer(MainWindow, this);
+    glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwSetMainWindowPosCallback(posX, posY); });
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
     static constexpr const char* dp_imapp_main_save_data_entry_name = "MainData";
@@ -249,4 +263,10 @@ void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer)
 
         textBuffer.appendf("MainWindowSize=%d,%d\n", main_window_width, main_window_height);
     }
+}
+
+void dpImApp::detail::AppImpl::GlfwSetMainWindowPosCallback(int posX, int posY)
+{
+    MainWindowPosX = posX;
+    MainWindowPosY = posY;
 }

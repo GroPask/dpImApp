@@ -32,6 +32,8 @@ namespace dpImApp::detail
         void ReadMainSaveDataLine(const char* line);
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
+        void GlfwSetMainWindowPosCallback(int posX, int posY);
+
         std::string MainWindowTitle;
         AppFlags Flags;
 
@@ -41,6 +43,9 @@ namespace dpImApp::detail
         bool IsRunning = false;
         unsigned int FrameCount = 0;
         GLFWwindow* MainWindow = nullptr;
+
+        int MainWindowPosX = 0;
+        int MainWindowPosY = 0;
     };
 
 } // namespace dpImApp::detail
