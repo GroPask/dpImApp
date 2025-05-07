@@ -32,7 +32,7 @@ namespace dpImApp::detail
         void ReadMainSaveDataLine(const char* line);
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
-        void GlfwSetMainWindowPosCallback(int posX, int posY);
+        void GlfwMainWindowPosCallback(int posX, int posY);
         void GlfwMainWindowRefreshCallback();
 
         std::string MainWindowTitle;

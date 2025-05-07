@@ -144,7 +144,7 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     #endif
 
     glfwSetWindowUserPointer(MainWindow, this);
-    glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwSetMainWindowPosCallback(posX, posY); });
+    glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowPosCallback(posX, posY); });
     glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
@@ -267,7 +267,7 @@ void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer)
     }
 }
 
-void dpImApp::detail::AppImpl::GlfwSetMainWindowPosCallback(int posX, int posY)
+void dpImApp::detail::AppImpl::GlfwMainWindowPosCallback(int posX, int posY)
 {
     MainWindowPosX = posX;
     MainWindowPosY = posY;
