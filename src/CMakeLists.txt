@@ -10,7 +10,6 @@ target_sources(${PROJECT_NAME} PRIVATE CMakeLists.txt
     ${incDir}/dpImApp.hpp
     ${incDir}/dpImApp.inl
     ${incDir}/ImGuiInfos.hpp
-    ${srcDir}/ImGuiExampleGlfwOpenGl3MainPatched.cpp
     ${srcDir}/ImGuiGlfwBackend.cpp
     ${srcDir}/ImGuiOpenGl3Backend.cpp
 )

@@ -8,6 +8,7 @@ option(DP_IMAPP_BUILD_EXAMPLES "Build examples programs" ${PROJECT_IS_TOP_LEVEL}
 option(DP_IMAPP_BUILD_TESTS "Build tests programs" ${PROJECT_IS_TOP_LEVEL})
 option(DP_IMAPP_INSTALL "Generate installation target" OFF) # TODO
 set(DP_IMAPP_IMGUI_BACKENDS_DIR ${CMAKE_BINARY_DIR}/ImGuiBackends CACHE PATH "ImGui backends dir")
+set(DP_IMAPP_IMGUI_GLFW_OPENGL3_EXAMPLE_FILE "" CACHE PATH "ImGui Glfw OpenGl3 exemple file")
 
 include(FetchContent)
 FetchContent_Declare(dpCMake URL https://github.com/GroPask/dpCMake/archive/refs/heads/main.zip)
@@ -30,6 +31,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<BUILD_INTERFACE:${DP_IMAPP_IMGUI_BACKENDS_DIR}>
 )
 
@@ -39,7 +41,7 @@ endif ()
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw opengl::opengl PUBLIC imgui::imgui)
-target_sources(${PROJECT_NAME} PRIVATE conanfile.py)
+target_sources(${PROJECT_NAME} PRIVATE conanfile.py ${DP_IMAPP_IMGUI_GLFW_OPENGL3_EXAMPLE_PATCHED_FILE})
 
 add_subdirectory(cmake)
 add_subdirectory(src)
