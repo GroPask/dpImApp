@@ -14,6 +14,7 @@
 namespace dpImApp::detail
 {
     int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, AppImplInterface& app_impl_interface);
+    void ImGuiExampleGlfwOpenGl3CoreLoop(AppImplInterface& app_impl_interface, GLFWwindow* window);
 
 } // namespace dpImApp::detail
 
@@ -144,6 +145,7 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
 
     glfwSetWindowUserPointer(MainWindow, this);
     glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwSetMainWindowPosCallback(posX, posY); });
+    glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
     static constexpr const char* dp_imapp_main_save_data_entry_name = "MainData";
@@ -269,4 +271,9 @@ void dpImApp::detail::AppImpl::GlfwSetMainWindowPosCallback(int posX, int posY)
 {
     MainWindowPosX = posX;
     MainWindowPosY = posY;
+}
+
+void dpImApp::detail::AppImpl::GlfwMainWindowRefreshCallback()
+{
+    ImGuiExampleGlfwOpenGl3CoreLoop(*this, MainWindow);
 }

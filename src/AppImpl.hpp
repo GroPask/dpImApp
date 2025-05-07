@@ -33,6 +33,7 @@ namespace dpImApp::detail
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
         void GlfwSetMainWindowPosCallback(int posX, int posY);
+        void GlfwMainWindowRefreshCallback();
 
         std::string MainWindowTitle;
         AppFlags Flags;
