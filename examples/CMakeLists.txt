@@ -1,10 +1,10 @@
 function(dp_imapp_add_example exampleName)
     add_executable(${PROJECT_NAME}_Example_${exampleName} ${exampleName}.cpp)
     target_link_libraries(${PROJECT_NAME}_Example_${exampleName} PRIVATE ${PROJECT_NAME}::${PROJECT_NAME})
-    set_target_properties(${PROJECT_NAME}_Example_${exampleName} PROPERTIES FOLDER examples)
 
     dp_configure_target(${PROJECT_NAME}_Example_${exampleName}
         DP_WARNINGS
+        AUTO_FOLDER
         AUTO_SOURCE_GROUP
         WIN32_RELEASE
         COPY_KNOWN_DLLS_NEAR_EXECUTABLE

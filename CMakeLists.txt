@@ -17,8 +17,6 @@ include(${dpcmake_SOURCE_DIR}/dpCMake.cmake)
 
 dp_configure_global(
     USE_FOLDERS_IF_TOP_LEVEL
-    DEFAULT_CONFIGURATIONS_IF_TOP_LEVEL Debug Release
-    DEPENDENCIES_TARGETS_FOLDER Dependencies
 )
 
 include(cmake/Dependencies.cmake)
@@ -42,6 +40,7 @@ endif ()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw opengl::opengl PUBLIC imgui::imgui)
 target_sources(${PROJECT_NAME} PRIVATE conanfile.py ${DP_IMAPP_IMGUI_GLFW_OPENGL3_EXAMPLE_PATCHED_FILE})
+dp_configure_target(${PROJECT_NAME} DP_WARNINGS AUTO_FOLDER AUTO_SOURCE_GROUP)
 
 add_subdirectory(cmake)
 add_subdirectory(src)
@@ -54,8 +53,3 @@ if (DP_IMAPP_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif ()
-
-dp_configure_target(${PROJECT_NAME}
-    DP_WARNINGS
-    AUTO_SOURCE_GROUP
-)
