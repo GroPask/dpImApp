@@ -29,6 +29,17 @@ inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, App
     }
 }
 
+inline void dpImApp::detail::AppImpl::SetMainWindowMinSize(int min_with, int min_height)
+{
+    const int final_min_with = (min_with > 0 ? min_with : GLFW_DONT_CARE);
+    const int final_min_height = (min_height > 0 ? min_height : GLFW_DONT_CARE);
+
+    if (MainWindow != nullptr)
+        glfwSetWindowSizeLimits(MainWindow, final_min_with, final_min_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    else
+        PendingMainWindowMinSize = std::make_pair(final_min_with, final_min_height);
+}
+
 inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const std::function<void()>& update_func)
 {
     assert(!IsRunning);
@@ -146,6 +157,12 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     glfwSetWindowUserPointer(MainWindow, this);
     glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowPosCallback(posX, posY); });
     glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
+
+    if (PendingMainWindowMinSize.has_value())
+    {
+        glfwSetWindowSizeLimits(MainWindow, PendingMainWindowMinSize.value().first, PendingMainWindowMinSize.value().second, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        PendingMainWindowMinSize.reset();
+    }
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
     static constexpr const char* dp_imapp_main_save_data_entry_name = "MainData";

@@ -4,6 +4,7 @@
 #include "AppImplInterface.hpp"
 
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -16,6 +17,8 @@ namespace dpImApp::detail
     {
     public:
         inline AppImpl(std::string_view main_window_title, AppFlags app_flags);
+
+        inline void SetMainWindowMinSize(int min_with, int min_height);
 
         inline int Run(void (*local_init_func)(void*), const std::function<void()>& update_func);
 
@@ -37,6 +40,8 @@ namespace dpImApp::detail
 
         std::string MainWindowTitle;
         AppFlags Flags;
+
+        std::optional<std::pair<int, int>> PendingMainWindowMinSize;
 
         void (*LocalInitFunc)(void*) = nullptr;
         const std::function<void()>* UpdateFunc = nullptr;

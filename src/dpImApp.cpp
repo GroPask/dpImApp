@@ -10,6 +10,11 @@ dpImApp::App::App(std::string_view main_window_title, AppFlags app_flags) :
 
 dpImApp::App::~App() = default;
 
+void dpImApp::App::SetMainWindowMinSize(int min_with, int min_height)
+{
+    Impl->SetMainWindowMinSize(min_with, min_height);
+}
+
 void dpImApp::App::BeginMainWindowContent(MainWindowFlags main_window_flags)
 {
     Impl->BeginMainWindowContent(main_window_flags);

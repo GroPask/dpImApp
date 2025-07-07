@@ -32,6 +32,8 @@ namespace dpImApp
         DP_IMAPP_API App(std::string_view main_window_title = "", AppFlags app_flags = 0);
         DP_IMAPP_API ~App();
 
+        DP_IMAPP_API void SetMainWindowMinSize(int min_with, int min_height);
+
         template <class F>
         int Run(F&& update_func);
 
