@@ -7,7 +7,7 @@ int main(int, char**)
     dpImApp::App app("dpImApp_Test_Simple");
     (void)app;
 
-    #if 0
+    #ifdef _WIN32
     int iteration_count = 0;
     return app.Run([&]()
     {
