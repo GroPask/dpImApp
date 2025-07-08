@@ -35,7 +35,13 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
 
+    - name: Install fp on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: f3d-app/install-mesa-windows-action@v1
+      with:
+        path: ${{github.workspace}}/build/tests/${{matrix.build_type}}
+
     - name: Test Windows
       if: ${{ matrix.os == 'windows-latest' }}
-      working-directory: ${{github.workspace}}/build
-      run: ./tests/${{matrix.build_type}}/dpImApp_Test_Simple.exe
+      working-directory: ${{github.workspace}}/build/tests/${{matrix.build_type}}
+      run: ./dpImApp_Test_Simple.exe
