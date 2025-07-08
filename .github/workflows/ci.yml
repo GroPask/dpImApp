@@ -34,8 +34,14 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       uses: f3d-app/install-mesa-windows-action@v1
       with:
-        path: ${{github.workspace}}\build
+        path: ${{github.workspace}}/build
 
-    - name: Test
+    - name: Test not Windows
+      if: ${{ matrix.os != 'windows-latest' }}
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
+
+    - name: Test Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      working-directory: ${{github.workspace}}/build
+      run: ./${{matrix.build_type}}/Simple.exe
