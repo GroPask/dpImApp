@@ -37,7 +37,5 @@ jobs:
         path: ${{github.workspace}}/build
 
     - name: Test
-      exclude:
-        - os: [ubuntu-latest, macos-latest]
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
