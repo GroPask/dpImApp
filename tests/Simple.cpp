@@ -10,6 +10,7 @@ int main(int, char**)
     return app.Run([&]()
     {
         ImGui::Text("Hello World");
+        ImGui::Button("Click Me");
 
         if (++iteration_count == 5)
             app.Close();
