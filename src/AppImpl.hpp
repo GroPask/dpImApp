@@ -35,6 +35,7 @@ namespace dpImApp::detail
         void ReadMainSaveDataLine(const char* line);
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
+        void GlfwMainWindowMaximizeCallback(bool maximized);
         void GlfwMainWindowPosCallback(int posX, int posY);
         void GlfwMainWindowRefreshCallback();
 
@@ -50,8 +51,13 @@ namespace dpImApp::detail
         unsigned int FrameCount = 0;
         GLFWwindow* MainWindow = nullptr;
 
-        int MainWindowPosX = 0;
-        int MainWindowPosY = 0;
+        bool MainWindowMaximized = false;
+        std::optional<bool> PendingNewMainWindowMaximized;
+
+        bool MainWindowJustUnmaximized = false;
+
+        std::pair<int, int> MainWindowNotMaximizedPos{ 0, 0 };
+        std::optional<std::pair<int, int>> PendingNewMainWindowPos;
     };
 
 } // namespace dpImApp::detail

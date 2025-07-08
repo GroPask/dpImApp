@@ -66,13 +66,16 @@ inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags mai
 
     static constexpr const char* MainWindowName = "###dpImAppMainWindow";
 
-    if (ImGuiWindow* imGuiMainWindow = ImGui::FindWindowByName(MainWindowName))
+    if (!MainWindowMaximized && !MainWindowJustUnmaximized)
     {
-        const int imGuiMainWindowPosX = static_cast<int>(imGuiMainWindow->Pos.x);
-        const int imGuiMainWindowPosY = static_cast<int>(imGuiMainWindow->Pos.y);
+        if (ImGuiWindow* imGuiMainWindow = ImGui::FindWindowByName(MainWindowName))
+        {
+            const int imGuiMainWindowPosX = static_cast<int>(imGuiMainWindow->Pos.x);
+            const int imGuiMainWindowPosY = static_cast<int>(imGuiMainWindow->Pos.y);
 
-        if (imGuiMainWindowPosX != MainWindowPosX || imGuiMainWindowPosY != MainWindowPosY)
-            glfwSetWindowPos(MainWindow, imGuiMainWindowPosX, imGuiMainWindowPosY);
+            if (imGuiMainWindowPosX != MainWindowNotMaximizedPos.first || imGuiMainWindowPosY != MainWindowNotMaximizedPos.second)
+                glfwSetWindowPos(MainWindow, imGuiMainWindowPosX, imGuiMainWindowPosY);
+        }
     }
 
     #ifdef IMGUI_HAS_VIEWPORT
@@ -155,6 +158,7 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     #endif
 
     glfwSetWindowUserPointer(MainWindow, this);
+    glfwSetWindowMaximizeCallback(MainWindow, [](GLFWwindow* window, int maximized) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowMaximizeCallback(maximized != 0); });
     glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowPosCallback(posX, posY); });
     glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
 
@@ -217,6 +221,25 @@ void dpImApp::detail::AppImpl::Update()
 {
     assert(UpdateFunc != nullptr);
 
+    if (PendingNewMainWindowMaximized.has_value())
+    {
+        const bool MainWindowWasMaximized = MainWindowMaximized;
+
+        MainWindowMaximized = PendingNewMainWindowMaximized.value();
+        PendingNewMainWindowMaximized.reset();
+
+        if (MainWindowWasMaximized && !MainWindowMaximized)
+            MainWindowJustUnmaximized = true;
+    }
+
+    if (PendingNewMainWindowPos.has_value())
+    {
+        if (!MainWindowMaximized)
+            MainWindowNotMaximizedPos = PendingNewMainWindowPos.value();
+
+        PendingNewMainWindowPos.reset();
+    }
+
     //std::printf("%d Begin\n", FrameCount);
     (*UpdateFunc)();
     //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -227,6 +250,8 @@ void dpImApp::detail::AppImpl::Update()
         if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
             glfwShowWindow(MainWindow);
     }
+
+    MainWindowJustUnmaximized = false;
 
     ++FrameCount;
 }
@@ -284,10 +309,14 @@ void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer)
     }
 }
 
+void dpImApp::detail::AppImpl::GlfwMainWindowMaximizeCallback(bool maximized)
+{
+    PendingNewMainWindowMaximized = maximized;
+}
+
 void dpImApp::detail::AppImpl::GlfwMainWindowPosCallback(int posX, int posY)
 {
-    MainWindowPosX = posX;
-    MainWindowPosY = posY;
+    PendingNewMainWindowPos = std::make_pair(posX, posY);
 }
 
 void dpImApp::detail::AppImpl::GlfwMainWindowRefreshCallback()
