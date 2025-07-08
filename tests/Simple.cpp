@@ -15,7 +15,7 @@ int main(int, char**)
         ImGui::Button("Click Me");
 
         if (++iteration_count == 5)
-            app.Closej();
+            app.Close();
     });
     #endif
 }
