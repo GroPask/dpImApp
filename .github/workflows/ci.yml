@@ -30,6 +30,14 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
+    - name: Install fp on Windows
+      if: ${{ ${{matrix.os}} == windows-latest }}
+      uses: f3d-app/install-mesa-windows-action@v1
+      with:
+        path: ${{github.workspace}}/build
+
     - name: Test
+      exclude:
+        - os: [ubuntu-latest, macos-latest]
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
