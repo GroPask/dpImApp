@@ -10,6 +10,9 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+
+#include <stdio.h>
 
 namespace dpImApp::detail
 {
