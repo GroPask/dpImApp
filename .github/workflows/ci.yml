@@ -21,7 +21,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt update
-        sudo apt install libxrandr-dev libwayland-dev libxkbcommon-dev libgl-dev
+        sudo apt install libxrandr-dev libxinerama-dev libwayland-dev libxkbcommon-dev libgl-dev
 
     - name: Configure
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
