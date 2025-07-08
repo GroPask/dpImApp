@@ -12,8 +12,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include <stdio.h>
-
 namespace dpImApp::detail
 {
     int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, AppImplInterface& app_impl_interface);
@@ -265,11 +263,15 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
     assert(IsRunning);
     assert(MainWindow != nullptr);
 
+    #ifdef _MSC_VER
+    #define sscanf sscanf_s
+    #endif
+
     if ((Flags & AppFlag::NoSavedMainWindowPos) == 0)
     {
         int main_window_x;
         int main_window_y;
-        if (sscanf_s(line, "MainWindowPos=%d,%d\n", &main_window_x, &main_window_y) == 2)
+        if (sscanf(line, "MainWindowPos=%d,%d\n", &main_window_x, &main_window_y) == 2)
         {
             glfwSetWindowPos(MainWindow, main_window_x, main_window_y);
             return;
@@ -280,12 +282,16 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
     {
         int main_window_width;
         int main_window_height;
-        if (sscanf_s(line, "MainWindowSize=%d,%d\n", &main_window_width, &main_window_height) == 2)
+        if (sscanf(line, "MainWindowSize=%d,%d\n", &main_window_width, &main_window_height) == 2)
         {
             glfwSetWindowSize(MainWindow, main_window_width, main_window_height);
             return;
         }
     }
+
+    #ifdef _MSC_VER
+    #undef sscanf
+    #endif
 }
 
 void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const
