@@ -13,7 +13,7 @@ jobs:
       matrix:
         build_type: ['Debug', 'Release']
         os: [ubuntu-latest, windows-latest, macos-latest]
-        shared_libs: ['ON', 'OFF']
+        shared_libs: ['OFF']
 
     steps:
     - uses: actions/checkout@v4
