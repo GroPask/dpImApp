@@ -6,7 +6,7 @@ int main(int, char**)
 {
     return 0;
 
-    #ifdef 0
+    #if 0
     dpImApp::App app("dpImApp_Test_Simple");
 
     int iteration_count = 0;
