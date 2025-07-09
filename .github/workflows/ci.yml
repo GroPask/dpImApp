@@ -38,7 +38,10 @@ jobs:
 
     - name: Install XQuartz on macOS
       if: ${{ runner.os == 'macOS' }}
-      run: brew install xquartz --cask
+      run: |
+        brew update
+        brew install glfw3
+        brew install xquartz --cask
 
     - name: Test Windows and MacOS
       if: ${{ matrix.os != 'ubuntu-latest' }}
