@@ -37,5 +37,11 @@ jobs:
         path: ${{github.workspace}}/build/tests/${{matrix.build_type}}
 
     - name: Test
+      if: ${{ matrix.os != 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
+
+    - name: Test Linux
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      working-directory: ${{github.workspace}}/build
+      run: ./dpImApp_Test_Simple
