@@ -39,7 +39,7 @@ jobs:
     - name: Test Windows and MacOS
       if: ${{ matrix.os != 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
-      run: ./tests/dpImApp_Test_Simple
+      run: xvfb-run ./tests/dpImApp_Test_Simple
       # ctest -C ${{matrix.build_type}}
 
     - name: Test Linux
