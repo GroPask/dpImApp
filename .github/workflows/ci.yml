@@ -44,4 +44,4 @@ jobs:
     - name: Test Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
-      run: ls -a
+      run: ./tests/dpImApp_Test_Simple
