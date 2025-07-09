@@ -36,10 +36,14 @@ jobs:
       with:
         path: ${{github.workspace}}/build/tests/${{matrix.build_type}}
 
+    - name: Install XQuartz on macOS
+      if: ${{ runner.os == 'macOS' }}
+      run: brew install xquartz --cask
+
     - name: Test Windows and MacOS
       if: ${{ matrix.os != 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
-      run: xvfb-run ./tests/dpImApp_Test_Simple
+      run: ./tests/dpImApp_Test_Simple
       # ctest -C ${{matrix.build_type}}
 
     - name: Test Linux
