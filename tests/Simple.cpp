@@ -6,6 +6,12 @@ int main(int, char**)
 {
     dpImApp::App app("dpImApp_Test_Simple");
 
+    #ifdef __APPLE__
+    (void)app;
+    // Waiting for a fix:
+    // https://github.com/glfw/glfw/issues/2570
+    // https://github.com/glfw/glfw/pull/2571
+    #else
     int iteration_count = 0;
     return app.Run([&]()
     {
@@ -15,4 +21,5 @@ int main(int, char**)
         if (++iteration_count == 5)
             app.Close();
     });
+    #endif
 }
