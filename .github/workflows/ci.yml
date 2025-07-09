@@ -24,6 +24,12 @@ jobs:
         sudo apt update
         sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev libgl-dev
 
+    - name: Install MacOS system dependencies
+      if: ${{ runner.os == 'macOS' }}
+      run: |
+        brew update
+        brew install glew glfw3
+
     - name: Configure
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.shared_libs}}
 
@@ -36,12 +42,9 @@ jobs:
       with:
         path: ${{github.workspace}}/build/tests/${{matrix.build_type}}
 
-    - name: Install XQuartz on macOS
+    - name: Install XQuartz on MacOS
       if: ${{ runner.os == 'macOS' }}
-      run: |
-        brew update
-        brew install glfw3
-        brew install xquartz --cask
+      run: brew install xquartz --cask
 
     - name: Test Windows and MacOS
       if: ${{ matrix.os != 'ubuntu-latest' }}
