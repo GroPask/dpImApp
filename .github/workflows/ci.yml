@@ -23,7 +23,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev libgl-dev
-        # libgl1-mesa-dev
 
     - name: Configure
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.shared_libs}}
@@ -37,7 +36,7 @@ jobs:
       with:
         path: ${{github.workspace}}/build/tests/${{matrix.build_type}}
 
-    - name: Test
+    - name: Test Windows
       if: ${{ matrix.os != 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
@@ -45,4 +44,5 @@ jobs:
     - name: Test Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: ${{github.workspace}}/build
-      run: xvfb-run ./tests/dpImApp_Test_Simple
+      run: xvfb-run ctest -C ${{matrix.build_type}}
+      # ./tests/dpImApp_Test_Simple
