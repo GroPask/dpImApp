@@ -136,6 +136,10 @@ inline void dpImApp::detail::AppImpl::Close()
 
 void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow()
 {
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
+    #endif
+
     if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
