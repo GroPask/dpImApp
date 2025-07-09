@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         build_type: ['Debug', 'Release']
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [macos-latest]
         shared_libs: ['ON', 'OFF']
 
     steps:

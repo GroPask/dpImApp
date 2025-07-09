@@ -5,9 +5,7 @@
 int main(int, char**)
 {
     dpImApp::App app("dpImApp_Test_Simple");
-    (void)app;
 
-    #if defined(_WIN32) || defined(__linux__)
     int iteration_count = 0;
     return app.Run([&]()
     {
@@ -17,5 +15,4 @@ int main(int, char**)
         if (++iteration_count == 5)
             app.Close();
     });
-    #endif
 }
