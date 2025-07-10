@@ -27,7 +27,7 @@ namespace dpImApp::detail
 
         inline void Close();
 
-        void InitBeforeCreateMainWindow() override;
+        void InitBeforeCreateMainWindow(int& main_window_width, int& main_window_height) override;
         void InitBeforeMainLoop(GLFWwindow* main_window) override;
         void Update() override ;
 
@@ -36,7 +36,9 @@ namespace dpImApp::detail
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
         void GlfwMainWindowMaximizeCallback(bool maximized);
+        void GlfwMainWindowIconifyCallback(bool iconified);
         void GlfwMainWindowPosCallback(int posX, int posY);
+        void GlfwMainWindowSizeCallback(int width, int height);
         void GlfwMainWindowRefreshCallback();
 
         std::string MainWindowTitle;
@@ -51,13 +53,22 @@ namespace dpImApp::detail
         unsigned int FrameCount = 0;
         GLFWwindow* MainWindow = nullptr;
 
+        std::optional<std::pair<int, int>> MainWindowPosFromSave;
+        std::optional<std::pair<int, int>> MainWindowSizeFromSave;
+
         bool MainWindowMaximized = false;
         std::optional<bool> PendingNewMainWindowMaximized;
-
         bool MainWindowJustUnmaximized = false;
 
-        std::pair<int, int> MainWindowNotMaximizedPos{ 0, 0 };
+        bool MainWindowIconified = false;
+        std::optional<bool> PendingNewMainWindowIconified;
+        bool MainWindowJustUniconified = false;
+
         std::optional<std::pair<int, int>> PendingNewMainWindowPos;
+        std::pair<int, int> MainWindowNotMaximizedNotIconifiedPos{ 0, 0 };
+
+        std::optional<std::pair<int, int>> PendingNewMainWindowSize;
+        std::pair<int, int> MainWindowNotMaximizedNotIconifiedSize{ 0, 0 };
     };
 
 } // namespace dpImApp::detail

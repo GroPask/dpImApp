@@ -16,7 +16,7 @@ namespace dpImApp
         AlwaysAutoResizeMainWindowToContent = (1 << 0),
         NoResizableMainWindow               = (1 << 1), // Implicit if AlwaysAutoResizeMainWindowToContent
         NoSavedMainWindowPos                = (1 << 2),
-        NoSavedMainWindowSize               = (1 << 3), // Implicit if AlwaysAutoResizeMainWindowToContent
+        NoSavedMainWindowSize               = (1 << 3),
     };
     using AppFlags = int;
 

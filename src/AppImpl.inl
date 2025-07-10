@@ -14,7 +14,7 @@
 
 namespace dpImApp::detail
 {
-    int ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, AppImplInterface& app_impl_interface);
+    int ImGuiExampleGlfwOpenGl3MainPatched(int main_window_width, int main_window_height, const char* main_window_title, AppImplInterface& app_impl_interface);
     void ImGuiExampleGlfwOpenGl3CoreLoop(AppImplInterface& app_impl_interface, GLFWwindow* window);
 
 } // namespace dpImApp::detail
@@ -24,10 +24,7 @@ inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, App
     Flags(app_flags)
 {
     if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
-    {
         Flags = Flags | AppFlag::NoResizableMainWindow;
-        Flags = Flags | AppFlag::NoSavedMainWindowSize;
-    }
 }
 
 inline void dpImApp::detail::AppImpl::SetMainWindowMinSize(int min_with, int min_height)
@@ -46,19 +43,11 @@ inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const s
     assert(!IsRunning);
 
     IsRunning = true;
-    FrameCount = 0;
 
     LocalInitFunc = local_init_func;
     UpdateFunc = &update_func;
 
-    const int result = detail::ImGuiExampleGlfwOpenGl3MainPatched(MainWindowTitle.c_str(), *this);
-
-    MainWindow = nullptr;
-    UpdateFunc = nullptr;
-    LocalInitFunc = nullptr;
-    IsRunning = false;
-
-    return result;
+    return detail::ImGuiExampleGlfwOpenGl3MainPatched(1280, 720, MainWindowTitle.c_str(), *this);
 }
 
 inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags main_window_flags)
@@ -74,7 +63,7 @@ inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags mai
             const int imGuiMainWindowPosX = static_cast<int>(imGuiMainWindow->Pos.x);
             const int imGuiMainWindowPosY = static_cast<int>(imGuiMainWindow->Pos.y);
 
-            if (imGuiMainWindowPosX != MainWindowNotMaximizedPos.first || imGuiMainWindowPosY != MainWindowNotMaximizedPos.second)
+            if (imGuiMainWindowPosX != MainWindowNotMaximizedNotIconifiedPos.first || imGuiMainWindowPosY != MainWindowNotMaximizedNotIconifiedPos.second)
                 glfwSetWindowPos(MainWindow, imGuiMainWindowPosX, imGuiMainWindowPosY);
         }
     }
@@ -134,40 +123,14 @@ inline void dpImApp::detail::AppImpl::Close()
     glfwSetWindowShouldClose(MainWindow, GLFW_TRUE);
 }
 
-void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow()
+void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow(int& main_window_width, int& main_window_height)
 {
-    if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-
-    if ((Flags & AppFlag::NoResizableMainWindow) != 0)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-}
-
-void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
-{
-    assert(main_window != nullptr);
-    assert(IsRunning);
-    assert(MainWindow == nullptr);
-
-    MainWindow = main_window;
-
     #if defined(DP_IMAPP_SHARED) && defined(DP_IMAPP_IMGUI_SEEMS_STATIC)
     assert(LocalInitFunc != nullptr);
     LocalInitFunc(ImGui::GetCurrentContext());
     #else
     assert(LocalInitFunc == nullptr);
     #endif
-
-    glfwSetWindowUserPointer(MainWindow, this);
-    glfwSetWindowMaximizeCallback(MainWindow, [](GLFWwindow* window, int maximized) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowMaximizeCallback(maximized != 0); });
-    glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowPosCallback(posX, posY); });
-    glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
-
-    if (PendingMainWindowMinSize.has_value())
-    {
-        glfwSetWindowSizeLimits(MainWindow, PendingMainWindowMinSize.value().first, PendingMainWindowMinSize.value().second, GLFW_DONT_CARE, GLFW_DONT_CARE);
-        PendingMainWindowMinSize.reset();
-    }
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
     static constexpr const char* dp_imapp_main_save_data_entry_name = "MainData";
@@ -201,18 +164,56 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     settingsHandler.UserData = this;
     ImGui::AddSettingsHandler(&settingsHandler);
 
-    //ImGuiContext& g = *GImGui;
-    //if (g.IO.IniFilename != nullptr)
-    //{
-    //    assert(!g.SettingsLoaded);
-    //    assert(g.SettingsWindows.empty());
-    //    ImGui::LoadIniSettingsFromDisk(g.IO.IniFilename);
-    //    g.SettingsLoaded = true;
-    //}
-    // Deplacer la creation du contexte dans InitBeforeCreateMainWindow comme ca on peut faire la gestion des settings directement
-    // Et avoir la bonne taille et position de fenetre direct
-    // On peut aussi savoir qu'il n'y a pas de save et qu'il faut attendre une frame avant de show en cas de AlwaysAutoResizeMainWindowToContent
-    // Virrer le implicit dans -> NoSavedMainWindowSize               = (1 << 3), // Implicit if AlwaysAutoResizeMainWindowToContent
+    {
+        ImGuiContext& g = *GImGui;
+
+        assert(!g.SettingsLoaded);
+        assert(g.SettingsWindows.empty());
+        assert(g.IO.IniFilename);
+        
+        ImGui::LoadIniSettingsFromDisk(g.IO.IniFilename);
+        g.SettingsLoaded = true;
+    }
+
+    if (MainWindowPosFromSave.has_value())
+    {
+        glfwWindowHint(GLFW_POSITION_X, MainWindowPosFromSave.value().first);
+        glfwWindowHint(GLFW_POSITION_Y, MainWindowPosFromSave.value().second);
+    }
+
+    if (MainWindowSizeFromSave.has_value())
+    {
+        main_window_width = MainWindowSizeFromSave.value().first;
+        main_window_height = MainWindowSizeFromSave.value().second;
+    }
+
+    if (!MainWindowSizeFromSave.has_value() && (Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
+    if ((Flags & AppFlag::NoResizableMainWindow) != 0)
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+}
+
+void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
+{
+    assert(main_window != nullptr);
+    assert(IsRunning);
+    assert(MainWindow == nullptr);
+
+    MainWindow = main_window;
+
+    glfwSetWindowUserPointer(MainWindow, this);
+    glfwSetWindowMaximizeCallback(MainWindow, [](GLFWwindow* window, int maximized) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowMaximizeCallback(maximized != 0); });
+    glfwSetWindowIconifyCallback(MainWindow, [](GLFWwindow* window, int iconified) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowIconifyCallback(iconified != 0); });
+    glfwSetWindowPosCallback(MainWindow, [](GLFWwindow* window, int posX, int posY) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowPosCallback(posX, posY); });
+    glfwSetWindowSizeCallback(MainWindow, [](GLFWwindow* window, int width, int height) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowSizeCallback(width, height); });
+    glfwSetWindowRefreshCallback(MainWindow, [](GLFWwindow* window) { static_cast<AppImpl*>(glfwGetWindowUserPointer(window))->GlfwMainWindowRefreshCallback(); });
+
+    if (PendingMainWindowMinSize.has_value())
+        glfwSetWindowSizeLimits(MainWindow, PendingMainWindowMinSize.value().first, PendingMainWindowMinSize.value().second, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
+    glfwGetWindowPos(MainWindow, &MainWindowNotMaximizedNotIconifiedPos.first, &MainWindowNotMaximizedNotIconifiedPos.second);
+    glfwGetWindowSize(MainWindow, &MainWindowNotMaximizedNotIconifiedSize.first, &MainWindowNotMaximizedNotIconifiedSize.second);
 }
 
 //#include <chrono>
@@ -233,12 +234,37 @@ void dpImApp::detail::AppImpl::Update()
             MainWindowJustUnmaximized = true;
     }
 
+    if (PendingNewMainWindowIconified.has_value())
+    {
+        const bool MainWindowWasIconified = MainWindowIconified;
+
+        MainWindowIconified = PendingNewMainWindowIconified.value();
+        PendingNewMainWindowIconified.reset();
+
+        if (MainWindowWasIconified && !MainWindowIconified)
+            MainWindowJustUniconified = true;
+    }
+
     if (PendingNewMainWindowPos.has_value())
     {
-        if (!MainWindowMaximized)
-            MainWindowNotMaximizedPos = PendingNewMainWindowPos.value();
+        if (!MainWindowMaximized && !MainWindowIconified && !MainWindowJustUnmaximized && !MainWindowJustUniconified)
+        {
+            MainWindowNotMaximizedNotIconifiedPos = std::move(PendingNewMainWindowPos.value());
+            ImGui::MarkIniSettingsDirty();
+        }
 
         PendingNewMainWindowPos.reset();
+    }
+
+    if (PendingNewMainWindowSize.has_value())
+    {
+        if (!MainWindowMaximized && !MainWindowIconified && !MainWindowJustUnmaximized && !MainWindowJustUniconified)
+        {
+            MainWindowNotMaximizedNotIconifiedSize = std::move(PendingNewMainWindowSize.value());
+            ImGui::MarkIniSettingsDirty();
+        }
+
+        PendingNewMainWindowSize.reset();
     }
 
     //std::printf("%d Begin\n", FrameCount);
@@ -248,11 +274,12 @@ void dpImApp::detail::AppImpl::Update()
 
     if (FrameCount == 0)
     {
-        if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
+        if (!MainWindowSizeFromSave.has_value() && (Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
             glfwShowWindow(MainWindow);
     }
 
     MainWindowJustUnmaximized = false;
+    MainWindowJustUniconified = false;
 
     ++FrameCount;
 }
@@ -261,7 +288,7 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
 {
     assert(line != nullptr);
     assert(IsRunning);
-    assert(MainWindow != nullptr);
+    assert(MainWindow == nullptr);
 
     #ifdef _MSC_VER
     #define sscanf sscanf_s
@@ -273,7 +300,7 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
         int main_window_y;
         if (sscanf(line, "MainWindowPos=%d,%d\n", &main_window_x, &main_window_y) == 2)
         {
-            glfwSetWindowPos(MainWindow, main_window_x, main_window_y);
+            MainWindowPosFromSave = std::make_pair(main_window_x, main_window_y);
             return;
         }
     }
@@ -284,7 +311,7 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
         int main_window_height;
         if (sscanf(line, "MainWindowSize=%d,%d\n", &main_window_width, &main_window_height) == 2)
         {
-            glfwSetWindowSize(MainWindow, main_window_width, main_window_height);
+            MainWindowSizeFromSave = std::make_pair(main_window_width, main_window_height);
             return;
         }
     }
@@ -297,25 +324,12 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
 void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const
 {
     assert(IsRunning);
-    assert(MainWindow != nullptr);
 
     if ((Flags & AppFlag::NoSavedMainWindowPos) == 0)
-    {
-        int main_window_x;
-        int main_window_y;
-        glfwGetWindowPos(MainWindow, &main_window_x, &main_window_y);
-
-        textBuffer.appendf("MainWindowPos=%d,%d\n", main_window_x, main_window_y);
-    }
+        textBuffer.appendf("MainWindowPos=%d,%d\n", MainWindowNotMaximizedNotIconifiedPos.first, MainWindowNotMaximizedNotIconifiedPos.second);
 
     if ((Flags & AppFlag::NoSavedMainWindowSize) == 0)
-    {
-        int main_window_width;
-        int main_window_height;
-        glfwGetWindowSize(MainWindow, &main_window_width, &main_window_height);
-
-        textBuffer.appendf("MainWindowSize=%d,%d\n", main_window_width, main_window_height);
-    }
+        textBuffer.appendf("MainWindowSize=%d,%d\n", MainWindowNotMaximizedNotIconifiedSize.first, MainWindowNotMaximizedNotIconifiedSize.second);
 }
 
 void dpImApp::detail::AppImpl::GlfwMainWindowMaximizeCallback(bool maximized)
@@ -323,9 +337,19 @@ void dpImApp::detail::AppImpl::GlfwMainWindowMaximizeCallback(bool maximized)
     PendingNewMainWindowMaximized = maximized;
 }
 
+void dpImApp::detail::AppImpl::GlfwMainWindowIconifyCallback(bool iconified)
+{
+    PendingNewMainWindowIconified = iconified;
+}
+
 void dpImApp::detail::AppImpl::GlfwMainWindowPosCallback(int posX, int posY)
 {
     PendingNewMainWindowPos = std::make_pair(posX, posY);
+}
+
+void dpImApp::detail::AppImpl::GlfwMainWindowSizeCallback(int width, int height)
+{
+    PendingNewMainWindowSize = std::make_pair(width, height);
 }
 
 void dpImApp::detail::AppImpl::GlfwMainWindowRefreshCallback()

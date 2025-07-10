@@ -10,7 +10,7 @@ namespace dpImApp::detail
     public:
         virtual ~AppImplInterface() = default;
 
-        virtual void InitBeforeCreateMainWindow() = 0;
+        virtual void InitBeforeCreateMainWindow(int& main_window_width, int& main_window_height) = 0;
         virtual void InitBeforeMainLoop(GLFWwindow* main_window) = 0;
         virtual void Update() = 0;
     };

@@ -69,10 +69,12 @@ function (generateImGuiExampleGlfwOpenGl3MainPatched inFile outFile)
         ADD_LINE_BEFORE "#include \"imgui.h\"" "#include \"AppImplInterface.hpp\"\n#define IMGUI_IMPL_API\n"
         ADD_LINE_BEFORE "// [Win32] Our example" "#if IMGUI_VERSION_NUM < 19160\n    #error ImGui version not supported\n#endif\n"
         ADD_LINE_BEFORE "static void glfw_error_callback" "namespace dpImApp::detail {\n"
+        ADD_LINE_BEFORE "// Main code" "void ImGuiExampleGlfwOpenGl3InitContext()\;"
         ADD_LINE_BEFORE "// Main code" "void ImGuiExampleGlfwOpenGl3CoreLoop(AppImplInterface& app_impl_interface, GLFWwindow* window)\;\n"
-        REPLACE "main(int, char**)" "ImGuiExampleGlfwOpenGl3MainPatched(const char* main_window_title, AppImplInterface& app_impl_interface)"
-        ADD_LINE_BEFORE "    // Decide GL+GLSL versions" "    app_impl_interface.InitBeforeCreateMainWindow()\;\n"
-        REPLACE "\"Dear ImGui GLFW+OpenGL3 example\"" "main_window_title"
+        REPLACE "main(int, char**)" "ImGuiExampleGlfwOpenGl3MainPatched(int main_window_width, int main_window_height, const char* main_window_title, AppImplInterface& app_impl_interface)"
+        ADD_LINE_BEFORE "    // Decide GL+GLSL versions" "    ImGuiExampleGlfwOpenGl3InitContext()\;\n"
+        ADD_LINE_BEFORE "    // Decide GL+GLSL versions" "    app_impl_interface.InitBeforeCreateMainWindow(main_window_width, main_window_height)\;\n"
+        REPLACE "glfwCreateWindow(1280, 720, \"Dear ImGui GLFW+OpenGL3 example\"" "glfwCreateWindow(main_window_width, main_window_height, main_window_title"
         ADD_LINE_BEFORE "    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable" "    #ifdef IMGUI_HAS_DOCK"
         ADD_LINE_AFTER "// Enable Docking" "    #endif"
         ADD_LINE_BEFORE "    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable" "    #ifdef IMGUI_HAS_VIEWPORT"
@@ -89,6 +91,12 @@ function (generateImGuiExampleGlfwOpenGl3MainPatched inFile outFile)
     )
 
     file(READ ${outFile} fileContent)
+    
+    string(FIND "${fileContent}" "    // Setup Dear ImGui context" initContextBeginIndex)
+    string(FIND "${fileContent}" "    // Setup Platform/Renderer backends" initContextEndIndex)
+    MATH(EXPR initContextLength "${initContextEndIndex}-${initContextBeginIndex}")
+    string(SUBSTRING "${fileContent}" ${initContextBeginIndex} ${initContextLength} initContext)
+    removeInString("${fileContent}" ${initContextBeginIndex} ${initContextEndIndex} fileContent)
 
     string(FIND "${fileContent}" "        // 1. Show the big demo window" demoBeginIndex)
     string(FIND "${fileContent}" "        // Rendering" demoEndIndex)
@@ -106,6 +114,7 @@ function (generateImGuiExampleGlfwOpenGl3MainPatched inFile outFile)
     string(SUBSTRING "${fileContent}" ${coreLoopBeginIndex} ${coreLoopLength} coreLoop)
     removeInString("${fileContent}" ${coreLoopBeginIndex} ${coreLoopEndIndex} fileContent)
 
+    string(APPEND fileContent "\nvoid ImGuiExampleGlfwOpenGl3InitContext()\n{\n${initContext}}\n")
     string(APPEND fileContent "\nvoid ImGuiExampleGlfwOpenGl3CoreLoop(AppImplInterface& app_impl_interface, GLFWwindow* window)\n{\n    ImGuiIO& io = ImGui::GetIO(); (void)io;\n\n${state}${coreLoop}}\n\n} // namespace dpImApp::detail\n")
 
     file(WRITE ${outFile} "${fileContent}")
