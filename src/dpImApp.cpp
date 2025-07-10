@@ -20,6 +20,11 @@ void dpImApp::App::SetMainWindowAspectRatio(int numerator, int denominator)
     Impl->SetMainWindowAspectRatio(numerator, denominator);
 }
 
+double dpImApp::App::GetRunningTime() const
+{
+    return Impl->GetRunningTime();
+}
+
 void dpImApp::App::BeginMainWindowContent(MainWindowFlags main_window_flags)
 {
     Impl->BeginMainWindowContent(main_window_flags);

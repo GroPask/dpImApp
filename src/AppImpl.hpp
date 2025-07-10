@@ -21,6 +21,8 @@ namespace dpImApp::detail
         inline void SetMainWindowMinSize(int min_with, int min_height);
         inline void SetMainWindowAspectRatio(int numerator, int denominator);
 
+        inline double GetRunningTime() const;
+
         inline int Run(void (*local_init_func)(void*), const std::function<void()>& update_func);
 
         inline void BeginMainWindowContent(MainWindowFlags main_window_flags);

@@ -50,6 +50,12 @@ inline void dpImApp::detail::AppImpl::SetMainWindowAspectRatio(int numerator, in
         PendingMainWindowAspectRatio = std::make_pair(final_numerator, final_denominator);
 }
 
+inline double dpImApp::detail::AppImpl::GetRunningTime() const
+{
+    assert(IsRunning);
+    return glfwGetTime();
+}
+
 inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const std::function<void()>& update_func)
 {
     assert(!IsRunning);
