@@ -230,9 +230,6 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
     glfwGetWindowSize(MainWindow, &MainWindowNotMaximizedNotIconifiedSize.first, &MainWindowNotMaximizedNotIconifiedSize.second);
 }
 
-//#include <chrono>
-//#include <thread>
-
 void dpImApp::detail::AppImpl::Update()
 {
     assert(UpdateFunc != nullptr);
@@ -281,10 +278,7 @@ void dpImApp::detail::AppImpl::Update()
         PendingNewMainWindowSize.reset();
     }
 
-    //std::printf("%d Begin\n", FrameCount);
     (*UpdateFunc)();
-    //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    //std::printf("%d End\n", FrameCount);
 
     if (FrameCount == 0)
     {
