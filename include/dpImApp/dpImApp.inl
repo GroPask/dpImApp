@@ -18,6 +18,16 @@ namespace dpImApp::detail
 }
 #endif
 
+inline dpImApp::App::App(std::string_view main_window_title) :
+    App(main_window_title, 1280, 720, 0)
+{
+}
+
+inline dpImApp::App::App(std::string_view main_window_title, AppFlags app_flags) :
+    App(main_window_title, 1280, 720, app_flags)
+{
+}
+
 template <class F>
 int dpImApp::App::Run(F&& update_func)
 {

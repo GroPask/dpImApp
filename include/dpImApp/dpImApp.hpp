@@ -29,7 +29,9 @@ namespace dpImApp
     class App
     {
     public:
-        DP_IMAPP_API App(std::string_view main_window_title = "", AppFlags app_flags = 0);
+        inline App(std::string_view main_window_title = "");
+        inline App(std::string_view main_window_title, AppFlags app_flags);
+        DP_IMAPP_API App(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags = 0);
         DP_IMAPP_API ~App();
 
         DP_IMAPP_API void SetMainWindowMinSize(int min_with, int min_height);

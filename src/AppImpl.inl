@@ -19,8 +19,9 @@ namespace dpImApp::detail
 
 } // namespace dpImApp::detail
 
-inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, AppFlags app_flags) :
+inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags) :
     MainWindowTitle(main_window_title),
+    MainWindowSize(main_window_width, main_window_height),
     Flags(app_flags)
 {
     if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
@@ -58,7 +59,7 @@ inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const s
     LocalInitFunc = local_init_func;
     UpdateFunc = &update_func;
 
-    return detail::ImGuiExampleGlfwOpenGl3MainPatched(1280, 720, MainWindowTitle.c_str(), *this);
+    return detail::ImGuiExampleGlfwOpenGl3MainPatched(MainWindowSize.first, MainWindowSize.second, MainWindowTitle.c_str(), *this);
 }
 
 inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags main_window_flags)

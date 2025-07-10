@@ -16,7 +16,7 @@ namespace dpImApp::detail
     class AppImpl : public AppImplInterface
     {
     public:
-        inline AppImpl(std::string_view main_window_title, AppFlags app_flags);
+        inline AppImpl(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags);
 
         inline void SetMainWindowMinSize(int min_with, int min_height);
         inline void SetMainWindowAspectRatio(int numerator, int denominator);
@@ -43,6 +43,7 @@ namespace dpImApp::detail
         void GlfwMainWindowRefreshCallback();
 
         std::string MainWindowTitle;
+        std::pair<int, int> MainWindowSize;
         AppFlags Flags;
 
         std::optional<std::pair<int, int>> PendingMainWindowMinSize;
