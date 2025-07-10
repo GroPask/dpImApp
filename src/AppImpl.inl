@@ -56,7 +56,7 @@ inline void dpImApp::detail::AppImpl::BeginMainWindowContent(MainWindowFlags mai
 
     static constexpr const char* MainWindowName = "###dpImAppMainWindow";
 
-    if (!MainWindowMaximized && !MainWindowJustUnmaximized)
+    if (!MainWindowMaximized && !MainWindowJustUnmaximized && !MainWindowIconified && !MainWindowJustUniconified)
     {
         if (ImGuiWindow* imGuiMainWindow = ImGui::FindWindowByName(MainWindowName))
         {
@@ -247,7 +247,7 @@ void dpImApp::detail::AppImpl::Update()
 
     if (PendingNewMainWindowPos.has_value())
     {
-        if (!MainWindowMaximized && !MainWindowIconified && !MainWindowJustUnmaximized && !MainWindowJustUniconified)
+        if (!MainWindowMaximized && !MainWindowIconified)
         {
             MainWindowNotMaximizedNotIconifiedPos = std::move(PendingNewMainWindowPos.value());
             ImGui::MarkIniSettingsDirty();
@@ -258,7 +258,7 @@ void dpImApp::detail::AppImpl::Update()
 
     if (PendingNewMainWindowSize.has_value())
     {
-        if (!MainWindowMaximized && !MainWindowIconified && !MainWindowJustUnmaximized && !MainWindowJustUniconified)
+        if (!MainWindowMaximized && !MainWindowIconified)
         {
             MainWindowNotMaximizedNotIconifiedSize = std::move(PendingNewMainWindowSize.value());
             ImGui::MarkIniSettingsDirty();
