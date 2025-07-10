@@ -36,6 +36,7 @@ namespace dpImApp
 
         DP_IMAPP_API void SetMainWindowMinSize(int min_with, int min_height);
         DP_IMAPP_API void SetMainWindowAspectRatio(int numerator, int denominator);
+        DP_IMAPP_API void SetMainWindowFloating(bool floating);
 
         DP_IMAPP_API double GetRunningTime() const;
 

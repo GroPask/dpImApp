@@ -20,6 +20,7 @@ namespace dpImApp::detail
 
         inline void SetMainWindowMinSize(int min_with, int min_height);
         inline void SetMainWindowAspectRatio(int numerator, int denominator);
+        inline void SetMainWindowFloating(bool floating);
 
         inline double GetRunningTime() const;
 
@@ -50,6 +51,7 @@ namespace dpImApp::detail
 
         std::optional<std::pair<int, int>> PendingMainWindowMinSize;
         std::optional<std::pair<int, int>> PendingMainWindowAspectRatio;
+        std::optional<bool> PendingMainWindowFloating;
 
         void (*LocalInitFunc)(void*) = nullptr;
         const std::function<void()>* UpdateFunc = nullptr;

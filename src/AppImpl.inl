@@ -50,6 +50,14 @@ inline void dpImApp::detail::AppImpl::SetMainWindowAspectRatio(int numerator, in
         PendingMainWindowAspectRatio = std::make_pair(final_numerator, final_denominator);
 }
 
+inline void dpImApp::detail::AppImpl::SetMainWindowFloating(bool floating)
+{
+    if (MainWindow != nullptr)
+        glfwSetWindowAttrib(MainWindow, GLFW_FLOATING, (floating ? GLFW_TRUE : GLFW_FALSE));
+    else
+        PendingMainWindowFloating = floating;
+}
+
 inline double dpImApp::detail::AppImpl::GetRunningTime() const
 {
     assert(IsRunning);
@@ -232,6 +240,9 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
 
     if (PendingMainWindowAspectRatio.has_value())
         glfwSetWindowAspectRatio(MainWindow, PendingMainWindowAspectRatio.value().first, PendingMainWindowAspectRatio.value().second);
+
+    if (PendingMainWindowFloating.has_value())
+        glfwSetWindowAttrib(MainWindow, GLFW_FLOATING, (PendingMainWindowFloating.value() ? GLFW_TRUE : GLFW_FALSE));
 
     glfwGetWindowPos(MainWindow, &MainWindowNotMaximizedNotIconifiedPos.first, &MainWindowNotMaximizedNotIconifiedPos.second);
     glfwGetWindowSize(MainWindow, &MainWindowNotMaximizedNotIconifiedSize.first, &MainWindowNotMaximizedNotIconifiedSize.second);

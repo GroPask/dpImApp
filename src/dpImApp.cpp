@@ -20,6 +20,11 @@ void dpImApp::App::SetMainWindowAspectRatio(int numerator, int denominator)
     Impl->SetMainWindowAspectRatio(numerator, denominator);
 }
 
+void dpImApp::App::SetMainWindowFloating(bool floating)
+{
+    Impl->SetMainWindowFloating(floating);
+}
+
 double dpImApp::App::GetRunningTime() const
 {
     return Impl->GetRunningTime();
