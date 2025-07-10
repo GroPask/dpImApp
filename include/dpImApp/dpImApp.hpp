@@ -33,6 +33,7 @@ namespace dpImApp
         DP_IMAPP_API ~App();
 
         DP_IMAPP_API void SetMainWindowMinSize(int min_with, int min_height);
+        DP_IMAPP_API void SetMainWindowAspectRatio(int numerator, int denominator);
 
         template <class F>
         int Run(F&& update_func);

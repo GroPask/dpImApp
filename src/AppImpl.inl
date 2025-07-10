@@ -38,6 +38,17 @@ inline void dpImApp::detail::AppImpl::SetMainWindowMinSize(int min_with, int min
         PendingMainWindowMinSize = std::make_pair(final_min_with, final_min_height);
 }
 
+inline void dpImApp::detail::AppImpl::SetMainWindowAspectRatio(int numerator, int denominator)
+{
+    const int final_numerator = (numerator > 0 ? numerator : GLFW_DONT_CARE);
+    const int final_denominator = (denominator > 0 ? denominator : GLFW_DONT_CARE);
+
+    if (MainWindow != nullptr)
+        glfwSetWindowAspectRatio(MainWindow, final_numerator, final_denominator);
+    else
+        PendingMainWindowAspectRatio = std::make_pair(final_numerator, final_denominator);
+}
+
 inline int dpImApp::detail::AppImpl::Run(void (*local_init_func)(void*), const std::function<void()>& update_func)
 {
     assert(!IsRunning);
@@ -211,6 +222,9 @@ void dpImApp::detail::AppImpl::InitBeforeMainLoop(GLFWwindow* main_window)
 
     if (PendingMainWindowMinSize.has_value())
         glfwSetWindowSizeLimits(MainWindow, PendingMainWindowMinSize.value().first, PendingMainWindowMinSize.value().second, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
+    if (PendingMainWindowAspectRatio.has_value())
+        glfwSetWindowAspectRatio(MainWindow, PendingMainWindowAspectRatio.value().first, PendingMainWindowAspectRatio.value().second);
 
     glfwGetWindowPos(MainWindow, &MainWindowNotMaximizedNotIconifiedPos.first, &MainWindowNotMaximizedNotIconifiedPos.second);
     glfwGetWindowSize(MainWindow, &MainWindowNotMaximizedNotIconifiedSize.first, &MainWindowNotMaximizedNotIconifiedSize.second);

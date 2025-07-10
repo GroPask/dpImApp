@@ -15,6 +15,11 @@ void dpImApp::App::SetMainWindowMinSize(int min_with, int min_height)
     Impl->SetMainWindowMinSize(min_with, min_height);
 }
 
+void dpImApp::App::SetMainWindowAspectRatio(int numerator, int denominator)
+{
+    Impl->SetMainWindowMinSize(numerator, denominator);
+}
+
 void dpImApp::App::BeginMainWindowContent(MainWindowFlags main_window_flags)
 {
     Impl->BeginMainWindowContent(main_window_flags);
