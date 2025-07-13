@@ -18,6 +18,10 @@ namespace dpImApp::detail
     public:
         inline AppImpl(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags);
 
+        inline std::string ComputeStandardSettingsFolder(std::string_view app_folder) const;
+
+        inline void SetSettingsPath(std::string_view settings_folder, std::string_view settings_file_name);
+
         inline void SetMainWindowMinSize(int min_with, int min_height);
         inline void SetMainWindowAspectRatio(int numerator, int denominator);
         inline void SetMainWindowFloating(bool floating);
@@ -48,6 +52,8 @@ namespace dpImApp::detail
         std::string MainWindowTitle;
         std::pair<int, int> MainWindowSize;
         AppFlags Flags;
+
+        std::string SettingsPath;
 
         std::optional<std::pair<int, int>> PendingMainWindowMinSize;
         std::optional<std::pair<int, int>> PendingMainWindowAspectRatio;

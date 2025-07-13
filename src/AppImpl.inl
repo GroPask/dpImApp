@@ -7,9 +7,13 @@
 
 #include <GLFW/glfw3.h>
 
+#include <filesystem>
+#include <memory>
+
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace dpImApp::detail
@@ -26,6 +30,61 @@ inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, int
 {
     if ((Flags & AppFlag::AlwaysAutoResizeMainWindowToContent) != 0)
         Flags = Flags | AppFlag::NoResizableMainWindow;
+}
+
+inline std::string dpImApp::detail::AppImpl::ComputeStandardSettingsFolder(std::string_view app_folder) const
+{
+    #if defined(_WIN32) && defined(_MSC_VER)
+    char* base_user_app_folder = nullptr;
+    std::size_t base_user_app_folder_size = 0;
+    if (_dupenv_s(&base_user_app_folder, &base_user_app_folder_size, "APPDATA") != 0 || base_user_app_folder == nullptr)
+        return {};
+
+    std::unique_ptr<char, decltype(&std::free)> base_user_app_folder_ptr(base_user_app_folder, &std::free);
+
+    assert(base_user_app_folder_size >= 1);
+
+    std::filesystem::path path = std::string_view(base_user_app_folder, base_user_app_folder_size - 1);
+    #else
+    #ifdef _WIN32
+    const char* base_user_app_folder = std::getenv("APPDATA");
+    #else
+    const char* base_user_app_folder = std::getenv("HOME");
+    #endif
+
+    if (base_user_app_folder == nullptr)
+        return {};
+
+    std::filesystem::path path = base_user_app_folder;
+    #endif
+
+    if (app_folder.empty())
+        path.append(MainWindowTitle);
+    else
+        path.append(app_folder);
+
+    return std::filesystem::weakly_canonical(std::filesystem::absolute(path)).string();
+}
+
+inline void dpImApp::detail::AppImpl::SetSettingsPath(std::string_view settings_folder, std::string_view settings_file_name)
+{
+    assert(!IsRunning);
+    assert(!settings_file_name.empty());
+
+    if (settings_folder.empty())
+    {
+        SettingsPath = std::filesystem::weakly_canonical(std::filesystem::absolute(settings_file_name)).string();
+        return;
+    }
+
+    std::filesystem::path path = std::filesystem::weakly_canonical(std::filesystem::absolute(settings_folder));
+
+    if (!std::filesystem::exists(path))
+        std::filesystem::create_directories(path);
+
+    path.append(settings_file_name);
+
+    SettingsPath = std::filesystem::weakly_canonical(std::filesystem::absolute(path)).string();
 }
 
 inline void dpImApp::detail::AppImpl::SetMainWindowMinSize(int min_with, int min_height)
@@ -192,6 +251,9 @@ void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow(int& main_window_width
 
     {
         ImGuiContext& g = *GImGui;
+
+        if (!SettingsPath.empty())
+            g.IO.IniFilename = SettingsPath.c_str();
 
         assert(!g.SettingsLoaded);
         assert(g.SettingsWindows.empty());

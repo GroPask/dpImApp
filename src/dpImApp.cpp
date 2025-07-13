@@ -10,6 +10,16 @@ dpImApp::App::App(std::string_view main_window_title, int main_window_width, int
 
 dpImApp::App::~App() = default;
 
+std::string dpImApp::App::ComputeStandardSettingsFolder(std::string_view app_folder) const
+{
+    return Impl->ComputeStandardSettingsFolder(app_folder);
+}
+
+void dpImApp::App::SetSettingsPath(std::string_view settings_folder, std::string_view settings_file_name)
+{
+    Impl->SetSettingsPath(settings_folder, settings_file_name);
+}
+
 void dpImApp::App::SetMainWindowMinSize(int min_with, int min_height)
 {
     Impl->SetMainWindowMinSize(min_with, min_height);
