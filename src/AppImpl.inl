@@ -34,6 +34,8 @@ inline dpImApp::detail::AppImpl::AppImpl(std::string_view main_window_title, int
 
 inline std::string dpImApp::detail::AppImpl::ComputeStandardSettingsFolder(std::string_view app_folder) const
 {
+    assert(!app_folder.empty());
+
     #if defined(_WIN32) && defined(_MSC_VER)
     char* base_user_app_folder = nullptr;
     std::size_t base_user_app_folder_size = 0;
@@ -58,12 +60,14 @@ inline std::string dpImApp::detail::AppImpl::ComputeStandardSettingsFolder(std::
     std::filesystem::path path = base_user_app_folder;
     #endif
 
-    if (app_folder.empty())
-        path.append(MainWindowTitle);
-    else
-        path.append(app_folder);
+    path.append(app_folder);
 
     return std::filesystem::weakly_canonical(std::filesystem::absolute(path)).string();
+}
+
+inline std::string dpImApp::detail::AppImpl::ComputeStandardSettingsFolder() const
+{
+    return ComputeStandardSettingsFolder(MainWindowTitle);
 }
 
 inline void dpImApp::detail::AppImpl::SetSettingsPath(std::string_view settings_folder, std::string_view settings_file_name)
@@ -89,6 +93,23 @@ inline void dpImApp::detail::AppImpl::SetSettingsPath(std::string_view settings_
     path.append(settings_file_name);
 
     SettingsPath = std::filesystem::weakly_canonical(std::filesystem::absolute(path)).string();
+}
+
+inline void dpImApp::detail::AppImpl::AddSimpleSettingsHandler(std::string_view name, std::function<void(const char*)>&& read_func, std::function<void(ImGuiTextBuffer&)>&& write_func)
+{
+    assert(!IsRunning);
+    assert(!name.empty());
+
+    ImGuiID hash = ImHashStr(name.data());
+
+    assert(SimpleSettingsHandlers.find(hash) == SimpleSettingsHandlers.end());
+
+    SimpleSettingsHandlers.emplace(std::move(hash), SimpleSettingsHandlerInfos{ std::string(name), std::move(read_func), std::move(write_func) });
+}
+
+inline void dpImApp::detail::AppImpl::AddSimpleSettingsHandler(std::function<void(const char*)>&& read_func, std::function<void(ImGuiTextBuffer&)>&& write_func)
+{
+    AddSimpleSettingsHandler(MainWindowTitle, std::move(read_func), std::move(write_func));
 }
 
 inline void dpImApp::detail::AppImpl::SetMainWindowMinSize(int min_with, int min_height)
@@ -253,6 +274,41 @@ void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow(int& main_window_width
     settingsHandler.UserData = this;
     ImGui::AddSettingsHandler(&settingsHandler);
 
+    for (const auto& [hash, simple_settings_handler] : SimpleSettingsHandlers)
+    {
+        ImGuiSettingsHandler handler;
+        handler.TypeName = simple_settings_handler.Name.c_str();;
+        handler.TypeHash = hash;
+        handler.ReadOpenFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* /*handler*/, const char* /*name*/) -> void*
+        {
+            return reinterpret_cast<void*>(1);
+        };
+        handler.ReadLineFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, void* /*entry*/, const char* line)
+        {
+            AppImpl* self = static_cast<AppImpl*>(handler->UserData);
+            assert(self != nullptr);
+
+            const auto it = self->SimpleSettingsHandlers.find(handler->TypeHash);
+            assert(it != self->SimpleSettingsHandlers.end());
+            
+            it->second.ReadFunc(line);
+        };
+        handler.WriteAllFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf)
+        {
+            const AppImpl* self = static_cast<const AppImpl*>(handler->UserData);
+            assert(self != nullptr);
+
+            const auto it = self->SimpleSettingsHandlers.find(handler->TypeHash);
+            assert(it != self->SimpleSettingsHandlers.end());
+
+            out_buf->appendf("[%s][Data]\n", handler->TypeName);
+            it->second.WriteFunc(*out_buf);
+            out_buf->appendf("\n");
+        };
+        handler.UserData = this;
+        ImGui::AddSettingsHandler(&handler);
+    }
+
     {
         ImGuiContext& g = *GImGui;
 
@@ -382,15 +438,11 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
     assert(IsRunning);
     assert(MainWindow == nullptr);
 
-    #ifdef _MSC_VER
-    #define sscanf sscanf_s
-    #endif
-
     if ((Flags & AppFlag::NoSavedMainWindowPos) == 0)
     {
         int main_window_x;
         int main_window_y;
-        if (sscanf(line, "MainWindowPos=%d,%d\n", &main_window_x, &main_window_y) == 2)
+        if (SafeSscanf(line, "MainWindowPos=%d,%d\n", &main_window_x, &main_window_y) == 2)
         {
             MainWindowPosFromSave = std::make_pair(main_window_x, main_window_y);
             return;
@@ -401,16 +453,12 @@ void dpImApp::detail::AppImpl::ReadMainSaveDataLine(const char* line)
     {
         int main_window_width;
         int main_window_height;
-        if (sscanf(line, "MainWindowSize=%d,%d\n", &main_window_width, &main_window_height) == 2)
+        if (SafeSscanf(line, "MainWindowSize=%d,%d\n", &main_window_width, &main_window_height) == 2)
         {
             MainWindowSizeFromSave = std::make_pair(main_window_width, main_window_height);
             return;
         }
     }
-
-    #ifdef _MSC_VER
-    #undef sscanf
-    #endif
 }
 
 void dpImApp::detail::AppImpl::WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const

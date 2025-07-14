@@ -7,7 +7,9 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
+using ImGuiID = unsigned int;
 struct ImGuiTextBuffer;
 struct GLFWwindow;
 
@@ -19,8 +21,12 @@ namespace dpImApp::detail
         inline AppImpl(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags);
 
         inline std::string ComputeStandardSettingsFolder(std::string_view app_folder) const;
+        inline std::string ComputeStandardSettingsFolder() const;
 
         inline void SetSettingsPath(std::string_view settings_folder, std::string_view settings_file_name);
+
+        inline void AddSimpleSettingsHandler(std::string_view name, std::function<void(const char*)>&& read_func, std::function<void(ImGuiTextBuffer&)>&& write_func);
+        inline void AddSimpleSettingsHandler(std::function<void(const char*)>&& read_func, std::function<void(ImGuiTextBuffer&)>&& write_func);
 
         inline void SetMainWindowMinSize(int min_with, int min_height);
         inline void SetMainWindowAspectRatio(int numerator, int denominator);
@@ -40,6 +46,13 @@ namespace dpImApp::detail
         void Update() override ;
 
     private:
+        struct SimpleSettingsHandlerInfos
+        {
+            std::string Name;
+            std::function<void(const char*)> ReadFunc;
+            std::function<void(ImGuiTextBuffer&)> WriteFunc;
+        };
+
         void ReadMainSaveDataLine(const char* line);
         void WriteAllMainSaveData(ImGuiTextBuffer& textBuffer) const;
 
@@ -54,6 +67,7 @@ namespace dpImApp::detail
         AppFlags Flags;
 
         std::string SettingsPath;
+        std::unordered_map<ImGuiID, SimpleSettingsHandlerInfos> SimpleSettingsHandlers;
 
         std::optional<std::pair<int, int>> PendingMainWindowMinSize;
         std::optional<std::pair<int, int>> PendingMainWindowAspectRatio;
