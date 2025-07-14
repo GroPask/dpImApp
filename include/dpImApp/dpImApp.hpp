@@ -49,10 +49,10 @@ namespace dpImApp
         DP_IMAPP_API void SetMainWindowAspectRatio(int numerator, int denominator);
         DP_IMAPP_API void SetMainWindowFloating(bool floating);
 
-        DP_IMAPP_API double GetRunningTime() const; // Shouldn't be called before Run
-
         template <class F>
         int Run(F&& update_func);
+
+        DP_IMAPP_API double GetRunningTime() const; // Shouldn't be called before Run
 
         DP_IMAPP_API void BeginMainWindowContent(MainWindowFlags main_window_flags = 0);
         DP_IMAPP_API void EndMainWindowContent();
