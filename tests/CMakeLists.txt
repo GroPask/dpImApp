@@ -12,5 +12,5 @@ function(dp_imapp_add_test testName)
     )
 endfunction()
 
-dp_imapp_add_test(Settings)
 dp_imapp_add_test(Simple)
+dp_imapp_add_test(Settings)
