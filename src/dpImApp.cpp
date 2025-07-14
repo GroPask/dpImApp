@@ -3,8 +3,10 @@
 #include "AppImpl.hpp"
 #include "AppImpl.inl"
 
+#include <cassert>
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 
 dpImApp::App::App(std::string_view main_window_title, int main_window_width, int main_window_height, AppFlags app_flags) :
     Impl(std::make_unique<detail::AppImpl>(main_window_title, main_window_width, main_window_height, app_flags))
@@ -80,14 +82,12 @@ int dpImApp::App::RunImpl(void (*local_init_func)(void*), const std::function<vo
 
 int dpImApp::SafeSscanf(const char* buffer, const char* format, ...)
 {
+    assert(std::strstr(format, "%s") == nullptr);
+
     std::va_list args;
     va_start(args, format);
 
-    #ifdef _MSC_VER
-    const int result = vsscanf_s(buffer, format, args);
-    #else
-    const int result = vsscanf(buffer, format, args);
-    #endif
+    const int result = std::vsscanf(buffer, format, args);
 
     va_end(args);
 

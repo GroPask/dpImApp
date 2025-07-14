@@ -41,25 +41,31 @@ int main(int, char**)
         char my_string[buffer_size];
         my_strncpy(my_string, "foo", buffer_size);
 
+        int my_value2 = 456;
+
         dpImApp::App app("dpImApp_Test_Settings");
 
         app.SetSettingsPath(app.ComputeStandardSettingsFolder("foo/bar bar\\test/complex"), "TestImGui.ini");
 
         app.AddSimpleSettingsHandler(
-            [&my_value, &my_string](const char* line)
+            [&my_value, &my_string, &my_value2](const char* line)
             {
                 int value;
                 if (dpImApp::SafeSscanf(line, "Value=%d\n", &value) == 1)
                     my_value = value;
 
                 char string[buffer_size];
-                if (dpImApp::SafeSscanf(line, "String=%63s\n", string, buffer_size) == 1)
+                int value2;
+                if (dpImApp::SafeSscanf(line, "String=%63s %d\n", string, &value2) == 2)
+                {
                     my_strncpy(my_string, string, buffer_size);
+                    my_value2 = value2;
+                }
             },
-            [&my_value, &my_string](ImGuiTextBuffer& outTextBuffer)
+            [&my_value, &my_string, &my_value2](ImGuiTextBuffer& outTextBuffer)
             {
                 outTextBuffer.appendf("Value=%d\n", my_value);
-                outTextBuffer.appendf("String=%s\n", my_string);
+                outTextBuffer.appendf("String=%s %d\n", my_string, my_value2);
             }
         );
 
@@ -71,7 +77,7 @@ int main(int, char**)
         {
             if (run_count == 0 && iteration_count == 0)
             {
-                if (my_value != 123 || std::strcmp(my_string, "foo") != 0)
+                if (my_value != 123 || std::strcmp(my_string, "foo") != 0 || my_value2 != 456)
                 {
                     main_result = EXIT_FAILURE;
                     app.Close();
@@ -80,9 +86,10 @@ int main(int, char**)
                 {
                     my_value = 42;
                     my_strncpy(my_string, "bar", buffer_size);
+                    my_value2 = 987;
                 }
             }
-            else if (my_value != 42 || std::strcmp(my_string, "bar") != 0)
+            else if (my_value != 42 || std::strcmp(my_string, "bar") != 0 || my_value2 != 987)
             {
                 main_result = EXIT_FAILURE;
                 app.Close();
