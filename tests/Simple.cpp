@@ -8,7 +8,7 @@ int main(int, char**)
 
     #ifdef __APPLE__
     (void)app;
-    // Waiting for a fix:
+    // Waiting Glfw for a fix:
     // https://github.com/glfw/glfw/issues/2570
     // https://github.com/glfw/glfw/pull/2571
     #else
@@ -18,8 +18,10 @@ int main(int, char**)
         ImGui::Text("Hello World");
         ImGui::Button("Click Me");
 
-        if (++iteration_count == 5)
+        if (iteration_count == 4)
             app.Close();
+
+        ++iteration_count;
     });
     #endif
 }
