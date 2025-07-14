@@ -243,44 +243,44 @@ void dpImApp::detail::AppImpl::InitBeforeCreateMainWindow(int& main_window_width
     #endif
 
     static constexpr const char* dp_imapp_save_data_name = "dpImApp";
-    static constexpr const char* dp_imapp_main_save_data_entry_name = "MainData";
 
-    ImGuiSettingsHandler settingsHandler;
-    settingsHandler.TypeName = dp_imapp_save_data_name;
-    settingsHandler.TypeHash = ImHashStr(dp_imapp_save_data_name);
-    settingsHandler.ReadOpenFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* /*handler*/, const char* name) -> void*
+    ImGuiSettingsHandler dp_imapp_settings_handler;
+    dp_imapp_settings_handler.TypeName = dp_imapp_save_data_name;
+    dp_imapp_settings_handler.TypeHash = ImHashStr(dp_imapp_save_data_name);
+    dp_imapp_settings_handler.ReadOpenFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* /*handler*/, const char* name) -> void*
     {
-        if (std::strcmp(name, dp_imapp_main_save_data_entry_name) == 0)
-            return reinterpret_cast<void*>(1);
-
-        return nullptr;
+        if (std::strcmp(name, "Data") != 0)
+            return nullptr;
+        return reinterpret_cast<void*>(1);
     };
-    settingsHandler.ReadLineFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, void* /*entry*/, const char* line)
+    dp_imapp_settings_handler.ReadLineFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, void* /*entry*/, const char* line)
     {
         AppImpl* self = static_cast<AppImpl*>(handler->UserData);
         assert(self != nullptr);
+
         self->ReadMainSaveDataLine(line);
     };
-    settingsHandler.WriteAllFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf)
+    dp_imapp_settings_handler.WriteAllFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf)
     {
-        out_buf->appendf("[%s][%s]\n", handler->TypeName, dp_imapp_main_save_data_entry_name);
-
         const AppImpl* self = static_cast<const AppImpl*>(handler->UserData);
         assert(self != nullptr);
-        self->WriteAllMainSaveData(*out_buf);
 
+        out_buf->appendf("[%s][Data]\n", handler->TypeName);
+        self->WriteAllMainSaveData(*out_buf);
         out_buf->appendf("\n");
     };
-    settingsHandler.UserData = this;
-    ImGui::AddSettingsHandler(&settingsHandler);
+    dp_imapp_settings_handler.UserData = this;
+    ImGui::AddSettingsHandler(&dp_imapp_settings_handler);
 
     for (const auto& [hash, simple_settings_handler] : SimpleSettingsHandlers)
     {
         ImGuiSettingsHandler handler;
         handler.TypeName = simple_settings_handler.Name.c_str();;
         handler.TypeHash = hash;
-        handler.ReadOpenFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* /*handler*/, const char* /*name*/) -> void*
+        handler.ReadOpenFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* /*handler*/, const char* name) -> void*
         {
+            if (std::strcmp(name, "Data") != 0)
+                return nullptr;
             return reinterpret_cast<void*>(1);
         };
         handler.ReadLineFn = [](ImGuiContext* /*ctx*/, ImGuiSettingsHandler* handler, void* /*entry*/, const char* line)
