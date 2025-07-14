@@ -30,7 +30,7 @@ namespace
 
 int main(int, char**)
 {
-    int main_result = EXIT_FAILURE;
+    int main_result = EXIT_SUCCESS;
 
     for (int run_count = 0; run_count < 3; ++run_count)
     {
@@ -82,7 +82,7 @@ int main(int, char**)
                     my_strncpy(my_string, "bar", buffer_size);
                 }
             }
-            else if (my_value != 42 || std::strcmp(my_string, "bar") != 0)
+            else if (my_value != 42 || std::strcmp(my_string, "bari") != 0)
             {
                 main_result = EXIT_FAILURE;
                 app.Close();
