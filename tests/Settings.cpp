@@ -30,7 +30,7 @@ namespace
 
 int main(int, char**)
 {
-    int main_result = EXIT_SUCCESS;
+    int main_result = EXIT_FAILURE;
 
     for (int run_count = 0; run_count < 3; ++run_count)
     {
