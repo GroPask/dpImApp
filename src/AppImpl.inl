@@ -70,6 +70,10 @@ inline void dpImApp::detail::AppImpl::SetSettingsPath(std::string_view settings_
 {
     assert(!IsRunning);
     assert(!settings_file_name.empty());
+    assert(settings_file_name.find('/') == std::string_view::npos);
+    assert(settings_file_name.find('\\') == std::string_view::npos);
+    assert(settings_file_name.find('~') == std::string_view::npos);
+    assert(settings_file_name.find("..") == std::string_view::npos);
 
     if (settings_folder.empty())
     {
