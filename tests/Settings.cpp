@@ -56,7 +56,7 @@ int main(int, char**)
 
                 char string[buffer_size];
                 int value2;
-                if (dpImApp::SafeSscanf(line, "String=%63s %d\n", string, buffer_size, &value2) == 2)
+                if (dpImApp::SafeSscanf(line, "String=%63s %d\n", string, &value2) == 2)
                 {
                     my_strncpy(my_string, string, buffer_size);
                     my_value2 = value2;
